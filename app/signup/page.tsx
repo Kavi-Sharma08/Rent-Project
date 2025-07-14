@@ -3,41 +3,56 @@ import {useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import {ZodIssue} from "@/types/typesforErrorSignup";
+import { AppDispatch } from "@/store/appStore";
+import { useDispatch } from "react-redux";
+import { addUser } from "@/slices/userSlice";
+import {IAPIError} from "@/types/typesforErrorSignup"
+import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} from "@/fonts/signupPageFont";
 export default function SignUp() {
+  const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("Kavi");
   const [email, setEmail] = useState("Kavi@gmail.com");
   const [password, setPassword] = useState("Kavi@123");
   const [togglePassword, setTogglePassword] = useState(false);
-  const [error, setError] = useState<ZodIssue[]>([]);
+  const [zodError, setZodError] = useState<ZodIssue[]>([]);
+  const [error, setError] = useState<IAPIError | null>(null)
+
   const [Login, setLogin] = useState(false);
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (Login) {
       try {
-        await axios.post("http://localhost:3000/api/login", {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL!}/api/login`, {
           email,
           password,
         });
+        dispatch(addUser(res?.data))
       } catch (error) {
         console.log(error);
       }
     } else {
       try {
-        const res = await axios.post("http://localhost:3000/api/signup", {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL!}/api/signup`, {
           name,
           email,
           password,
         });
+        
       } catch (error: any) {
-        const resError = error.response.data.errors;
-        console.log(resError);
-        setError(resError);
+        const resError = error?.response?.data?.errors;
+        if(resError){
+          setZodError(resError)
+        }
+        else{
+          setError(error.response)
+
+        }
       }
     }
   };
   const getErrorMessage = (field: string) => {
-    if (error.length>0) {
-      const filteredError = error.filter(
+    if (zodError.length>0) {
+      const filteredError = zodError.filter(
         (pathError) => pathError.path[0] === field
       );
       console.log(filteredError)
@@ -47,28 +62,29 @@ export default function SignUp() {
       return null;
     }
   };
+  console.log(error)
 
   return (
-    <div className="min-h-screen bg-black grid sm:grid-cols-2  ">
+    <div className={`min-h-screen bg-black grid sm:grid-cols-2`}>
       <div className="sm:grid-cols-1 flex justify-center items-center w-full h-full">
         <div className="flex flex-col justify-center items-center px-6 py-8 text-white">
           <div className="w-full max-w-md">
-            <div className="flex space-x-2 mb-8 text-2xl md:text-3xl font-semibold">
-              <span>Welcome</span>
-              <span>to</span>
-              <span className="text-[#2a52be]">JustShare</span>
+            <div className="flex space-x-2 mb-8 text-2xl md:text-4xl font-semibold">
+              <span className={`${Manrope_Font.className}`}>Welcome</span>
+              <span className={`${Manrope_Font.className}`}>to</span>
+              <span className={`text-[#2a52be] ${Lora_Font.className}`}>JustShare</span>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               {!Login && (
                 <div className="flex flex-col">
-                  <label htmlFor="Name" className="mb-1">
+                  <label htmlFor="Name" className={`mb-1 ${Raleway_Font.className}`}>
                     Name
                   </label>
                   <input
                     id="Name"
                     type="text"
-                    className="bg-[#232735] text-white rounded-sm p-2 focus:outline-none"
+                    className={`bg-[#232735] text-white rounded-sm p-2 focus:outline-none text-sm ${Roboto_Font.className} `}
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -83,13 +99,13 @@ export default function SignUp() {
               )}
 
               <div className="flex flex-col">
-                <label htmlFor="Email" className="mb-1">
+                <label htmlFor="Email" className={`mb-1 ${Raleway_Font.className}`}>
                   Email
                 </label>
                 <input
                   id="Email"
                   type="text"
-                  className="bg-[#232735] text-white rounded-sm p-2 focus:outline-none"
+                  className={`bg-[#232735] text-white rounded-sm p-2 focus:outline-none text-sm ${Roboto_Font.className} `}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -98,17 +114,24 @@ export default function SignUp() {
                       {getErrorMessage("email")?.map((msg)=>msg.message)}
                     </p>
                 )}
+                {
+                  error && (
+                    <p style={{ color: "red", fontSize: "12px" }}>
+                      {error.data.message}
+                    </p>
+                  )
+                }
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="Password" className="mb-1">
+                <label htmlFor="Password" className={`mb-1 ${Raleway_Font.className}`}>
                   Password
                 </label>
                 <div className="relative">
                   <input
                     id="Password"
                     type={togglePassword ? "text" : "password"}
-                    className="bg-[#232735] text-white rounded-sm p-2 w-full focus:outline-none"
+                    className={`bg-[#232735] text-white rounded-sm p-2 w-full focus:outline-none text-sm ${Roboto_Font.className} `}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -127,20 +150,20 @@ export default function SignUp() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-[#2a52be] text-white rounded-sm py-2 hover:bg-blue-700 transition"
+                className={`w-full bg-[#2a52be] text-white rounded-sm py-2 hover:bg-blue-700 transition ${Manrope_Font.className}`}
               >
                 {Login ? "Sign in" : "Sign up"}
               </button>
             </form>
             <div className="mt-5">
-              <p>
-                {Login ? "Already Registered?" : "Don't have an account?"}{" "}
+              <p className={`${Manrope_Font.className}`}>
+                {!Login ? "Already Registered?" : "Don't have an account?"}{" "}
                 <button
                   className="text-[#2a52be] cursor-pointer"
                   onClick={() => setLogin((prev) => !prev)}
                   type="button"
                 >
-                  {Login ? "Login" : "Signup"}
+                  {!Login ? "Login" : "Signup"}
                 </button>
               </p>
             </div>
@@ -148,7 +171,7 @@ export default function SignUp() {
         </div>
       </div>
       {/* Right Section (Image) */}
-      <div className="sm:grid-cols-1 flex flex-col justify-center items-center px-6 py-8 text-center text-white">
+      <div className={`sm:grid-cols-1 flex flex-col justify-center items-center px-6 py-8 text-center text-white ${Open_Font.className}`}>
         <img
           src="/images/SignupPageImage.jpg"
           alt="Students sharing"

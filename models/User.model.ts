@@ -1,10 +1,12 @@
 import { Schema, Document, models, model, Model } from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
 interface UserInterface extends Document {
   name: string;
   email: string;
   password: string;
   createdAt: Date;
+  generateJWT(): string;
 }
 
 const UserSchema = new Schema<UserInterface>({
@@ -45,6 +47,16 @@ UserSchema.pre("save", async function (next) {
   }
   next();
 });
+
+UserSchema.methods.generateJWT =function(){
+  const token =jwt.sign({
+    id : this._id,
+    email : this.email
+  },process.env.JWT_SECRET!,
+  {expiresIn : "1d"}
+  )
+  return token;
+}
 
 const UserModel =
   (models.User as Model<UserInterface>) ||

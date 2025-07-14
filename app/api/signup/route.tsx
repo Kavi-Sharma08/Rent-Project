@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import UserModel from "@/models/User.model";
 import { signupSchema } from "@/schemasForZod/signupSchema";
 import DBconnect from "@/lib/dbConnect";
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest , res:NextResponse) {
   const body = await req.json();
   const parseResult = signupSchema.safeParse(body);
   if (!parseResult.success) {
@@ -19,15 +19,24 @@ export async function POST(req: NextRequest) {
             password
         })
         const userinfo = await user.save();
-        return NextResponse.json({
-            success : true,
+        const res = NextResponse.json({
+            success: true,
+            message: "User created",
             data : userinfo
-        })
-    } catch (error) {
-        console.log('Error in signup:', error);
+        });
+
+        const token = user.generateJWT();
+        res.cookies.set("token" , token);
+        console.log(token)
+        return res;
+    } 
+    catch (error : any) {
+      return NextResponse.json({
+        success : false,
+        message : error.message
+      },{status : 400})
         
     }
 
   }
-  return new Response("Signup");
 }

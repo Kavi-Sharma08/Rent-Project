@@ -6,3 +6,12 @@ export  interface ZodIssue {
   origin?: string;
   path: string[];
 }
+
+export interface IAPIError {
+  data: {
+    message: string;
+    success: boolean;
+  };
+  status: number;
+  
+}

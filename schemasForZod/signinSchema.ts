@@ -1,10 +1,10 @@
 import * as z from "zod"
 export const signinSchema = z.object({
-    Email: z
+    email: z
     .string()
     .email({ message: "Invalid email format" }),
 
-  Password: z
+  password: z
     .coerce
     .string()
     .min(8, { message: "Password must be greater than 8 characters" })
