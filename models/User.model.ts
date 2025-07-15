@@ -1,12 +1,14 @@
 import { Schema, Document, models, model, Model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
-interface UserInterface extends Document {
-  name: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  generateJWT(): string;
+export interface UserInterface extends Document {
+  name: string,
+  email: string,
+  password: string,
+  createdAt: Date,
+  refreshToken : string,
+  generateAccessToken(): string,
+  generateRefreshToken() : Promise<string>
 }
 
 const UserSchema = new Schema<UserInterface>({
@@ -22,6 +24,9 @@ const UserSchema = new Schema<UserInterface>({
   password: {
     type: String,
     required: [true, "password is required"],
+  },
+  refreshToken : {
+    type : String,
   },
   createdAt: {
     type: Date,
@@ -48,14 +53,25 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-UserSchema.methods.generateJWT =function(){
-  const token =jwt.sign({
+UserSchema.methods.generateAccessToken =function(){
+  const accessToken =jwt.sign({
     id : this._id,
     email : this.email
   },process.env.JWT_SECRET!,
   {expiresIn : "1d"}
   )
-  return token;
+  return accessToken;
+}
+
+UserSchema.methods.generateRefreshToken = async function(){
+  const refreshToken = jwt.sign({
+    id : this._id,
+    email : this.email
+    
+  } , process.env.REFRESH_TOKEN_SECRET!)
+  const hashedRefreshToken = await bcrypt.hash(refreshToken , 10);
+  this.refreshToken = hashedRefreshToken;
+  return refreshToken;
 }
 
 const UserModel =

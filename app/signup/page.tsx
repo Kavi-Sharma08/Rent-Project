@@ -1,5 +1,5 @@
 "use client";
-import {useState } from "react";
+import {useState , useEffect } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import {ZodIssue} from "@/types/typesforErrorSignup";
@@ -8,14 +8,18 @@ import { useDispatch } from "react-redux";
 import { addUser } from "@/slices/userSlice";
 import {IAPIError} from "@/types/typesforErrorSignup"
 import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} from "@/fonts/signupPageFont";
+import { useRouter } from "next/navigation";
+import { User } from "@/types/typesForUser";
 export default function SignUp() {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("Kavi");
   const [email, setEmail] = useState("Kavi@gmail.com");
   const [password, setPassword] = useState("Kavi@123");
   const [togglePassword, setTogglePassword] = useState(false);
   const [zodError, setZodError] = useState<ZodIssue[]>([]);
-  const [error, setError] = useState<IAPIError | null>(null)
+  const [error, setError] = useState<IAPIError | null>(null);
+  
 
   const [Login, setLogin] = useState(false);
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
@@ -26,9 +30,20 @@ export default function SignUp() {
           email,
           password,
         });
+        console.log(res)
         dispatch(addUser(res?.data))
-      } catch (error) {
-        console.log(error);
+        router.push(`/profile/${res?.data?.data?._id}`)
+        
+        
+      } catch (error : any) {
+        const resError = error?.response?.data?.errors;
+        if(resError){
+          setZodError(resError)
+        }
+        else{
+          console.log(error)
+          setError(error.response)
+        }
       }
     } else {
       try {
@@ -50,6 +65,7 @@ export default function SignUp() {
       }
     }
   };
+
   const getErrorMessage = (field: string) => {
     if (zodError.length>0) {
       const filteredError = zodError.filter(
@@ -62,7 +78,10 @@ export default function SignUp() {
       return null;
     }
   };
-  console.log(error)
+  useEffect(()=>{
+    setError(null);
+
+  },[Login])
 
   return (
     <div className={`min-h-screen bg-black grid sm:grid-cols-2`}>
@@ -72,7 +91,7 @@ export default function SignUp() {
             <div className="flex space-x-2 mb-8 text-2xl md:text-4xl font-semibold">
               <span className={`${Manrope_Font.className}`}>Welcome</span>
               <span className={`${Manrope_Font.className}`}>to</span>
-              <span className={`text-[#2a52be] ${Lora_Font.className}`}>JustShare</span>
+              <span className={`text-[#004780] ${Lora_Font.className}`}>JustShare</span>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -115,7 +134,7 @@ export default function SignUp() {
                     </p>
                 )}
                 {
-                  error && (
+                  error?.data?.message?.toLowerCase().includes("email") && (
                     <p style={{ color: "red", fontSize: "12px" }}>
                       {error.data.message}
                     </p>
@@ -145,8 +164,23 @@ export default function SignUp() {
                     <p style={{ color: "red", fontSize: "12px" }}>
                       {getErrorMessage("password")?.map((msg)=>msg.message)}
                     </p>
-                )}
+                  )}
+                  {
+                    error?.data?.message?.toLowerCase().includes("password") && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {error.data.message}
+                      </p>
+                    )
+                  }
                 </div>
+                
+              </div>
+              <div>
+                {error?.data?.message?.toLowerCase().includes("invalid") && (
+                    <p style={{ color: "red", fontSize: "12px" }}>
+                      {error.data.message}
+                    </p>
+                )}
               </div>
               <button
                 type="submit"
@@ -168,6 +202,7 @@ export default function SignUp() {
               </p>
             </div>
           </div>
+          
         </div>
       </div>
       {/* Right Section (Image) */}

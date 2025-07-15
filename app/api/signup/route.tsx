@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import UserModel from "@/models/User.model";
 import { signupSchema } from "@/schemasForZod/signupSchema";
 import DBconnect from "@/lib/dbConnect";
-export async function POST(req: NextRequest , res:NextResponse) {
+export async function POST(req: NextRequest) {
   const body = await req.json();
   const parseResult = signupSchema.safeParse(body);
   if (!parseResult.success) {
@@ -18,16 +18,31 @@ export async function POST(req: NextRequest , res:NextResponse) {
             email,
             password
         })
+        const refreshTokenForTheUser = await user.generateRefreshToken();
+        const accessToken = user.generateAccessToken();
         const userinfo = await user.save();
         const res = NextResponse.json({
             success: true,
             message: "User created",
             data : userinfo
         });
+        res.cookies.set("accessToken", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 24 * 60 * 60,
+          path: "/"
+        });
+        res.cookies.set("refreshToken", refreshTokenForTheUser, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 7 * 24 * 60 * 60,
+          path: "/"
+        });
 
-        const token = user.generateJWT();
-        res.cookies.set("token" , token);
-        console.log(token)
+        
+        console.log(accessToken)
         return res;
     } 
     catch (error : any) {
