@@ -8,7 +8,8 @@ export interface UserInterface extends Document {
   createdAt: Date,
   refreshToken : string,
   generateAccessToken(): string,
-  generateRefreshToken() : Promise<string>
+  generateRefreshToken() : Promise<string>,
+  isPasswordValid(passwordFromUser : string) : Promise<boolean>
 }
 
 const UserSchema = new Schema<UserInterface>({
@@ -72,6 +73,13 @@ UserSchema.methods.generateRefreshToken = async function(){
   const hashedRefreshToken = await bcrypt.hash(refreshToken , 10);
   this.refreshToken = hashedRefreshToken;
   return refreshToken;
+}
+UserSchema.methods.isPasswordValid = async function(passwordFromUser : string){
+  const isValid = await bcrypt.compare(passwordFromUser , this.password);
+  if(isValid){
+    return true;
+  }
+  return false;
 }
 
 const UserModel =

@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { signinSchema } from "@/schemasForZod/signinSchema";
 import DBconnect from "@/lib/dbConnect";
 import UserModel from "@/models/User.model";
-import bcrypt from "bcrypt"
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken"
 import { JWTPayload } from "@/types/typesForJWTPayload";
-import { User } from "@/types/typesForUser";
 import { UserInterface } from "@/models/User.model";
 export async function POST(req : NextRequest){
     
@@ -23,48 +21,51 @@ export async function POST(req : NextRequest){
         const {email , password} = body;
         const tokenFromtheUser = (await cookie).get('accessToken')?.value;
         const RefreshtokenFromtheUser = (await cookie).get('refreshToken')?.value;
+        const user : UserInterface | null = await UserModel.findOne({email})
+        if(!user){
+          return NextResponse.json({
+            message : "User not Found",
+
+
+          } , {status : 400})
+        }
+        const isPasswordValid = await user.isPasswordValid(password);
+        console.log(isPasswordValid)
+        if(!isPasswordValid){
+            return NextResponse.json({
+                message : "Password is not valid",
+
+            },{status : 400});
+
+        }
         try {
+            console.log("Inside Try")
             if(tokenFromtheUser){
                 const userInfo = jwt.verify(tokenFromtheUser , process.env.JWT_SECRET!) as JWTPayload;
-                const idOfLoggedInUser = userInfo.id;
-                const user : User|null = await UserModel.findOne({_id : idOfLoggedInUser}).select("-password -refreshToken")
-                if(!user){
-                    return NextResponse.json({
-                        message : "Unauthorized",
-
-                    } , {status : 401})
-
+                if(!userInfo){
+                  return NextResponse.json({
+                    message : "Unauthorized"
+                  } , {status : 400})
                 }
-                else{
-                    console.log(user);
-                    return NextResponse.json({
-                        data : user
-                    })
-                        
-
-                }
+                return NextResponse.json({data : user});
             }
             else if(RefreshtokenFromtheUser){
                 // new token from the refresh token
-                console.log(RefreshtokenFromtheUser)
-
+                console.log("Inside else if")
                 const userInfo = jwt.verify(RefreshtokenFromtheUser , process.env.REFRESH_TOKEN_SECRET!) as JWTPayload;
-
-                const {email} = userInfo;
-                const user : UserInterface | null = await UserModel.findOne({email});
-                console.log(user)
-                if(!user){
-                    return NextResponse.json({
-                        message : "Unauthorized"
-                    },{status : 400})
+                if(!userInfo){
+                  return NextResponse.json({
+                    message : "Unauthorized"
+                  } , {status : 400})
                 }
                 const newRefreshToken =await  user.generateRefreshToken();
                 const newAccessToken = user.generateAccessToken();
                 const res = NextResponse.json({
                     success: true,
-                    message: "User created",
+                    message: "New Token is Generated",
                     data : user
                 });
+                await user.save();
                 res.cookies.set("accessToken", newAccessToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
@@ -87,14 +88,6 @@ export async function POST(req : NextRequest){
 
             }
             else{
-                const user : UserInterface | null = await UserModel.findOne({email});
-                if(!user){
-                    return NextResponse.json({
-                        message : "Unauthorized",
-
-                    },{status : 400});
-                }
-
                 const accessToken = user.generateAccessToken();
                 const refreshToken = await user.generateRefreshToken();
                 const res = NextResponse.json({
@@ -128,7 +121,10 @@ export async function POST(req : NextRequest){
             
         } catch (error) {
 
-            console.log(error)
+            return NextResponse.json({
+                success: false,
+                message: "Session expired login again"
+            }, { status: 401 });
             
         }
 

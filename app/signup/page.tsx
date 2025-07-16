@@ -9,7 +9,8 @@ import { addUser } from "@/slices/userSlice";
 import {IAPIError} from "@/types/typesforErrorSignup"
 import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} from "@/fonts/signupPageFont";
 import { useRouter } from "next/navigation";
-import { User } from "@/types/typesForUser";
+import { LoginResponse } from "@/types/ResponseDataForUser";
+import toast , {Toaster} from "react-hot-toast"
 export default function SignUp() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -26,12 +27,12 @@ export default function SignUp() {
     e.preventDefault();
     if (Login) {
       try {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL!}/api/login`, {
+        const res = await axios.post<LoginResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/login`, {
           email,
           password,
         });
         console.log(res)
-        dispatch(addUser(res?.data))
+        dispatch(addUser(res?.data?.data))
         router.push(`/profile/${res?.data?.data?._id}`)
         
         
@@ -41,8 +42,8 @@ export default function SignUp() {
           setZodError(resError)
         }
         else{
-          console.log(error)
-          setError(error.response)
+          toast.error(error.response.data.message);
+          setError(error.response);
         }
       }
     } else {
@@ -85,6 +86,7 @@ export default function SignUp() {
 
   return (
     <div className={`min-h-screen bg-black grid sm:grid-cols-2`}>
+      <Toaster/>
       <div className="sm:grid-cols-1 flex justify-center items-center w-full h-full">
         <div className="flex flex-col justify-center items-center px-6 py-8 text-white">
           <div className="w-full max-w-md">
