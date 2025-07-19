@@ -31,9 +31,8 @@ export default function SignUp() {
           email,
           password,
         });
-        console.log(res)
         dispatch(addUser(res?.data?.data))
-        router.push(`/profile/${res?.data?.data?._id}`)
+        router.push(`/update/${res?.data?.data?._id}`)
         
         
       } catch (error : any) {
@@ -48,11 +47,14 @@ export default function SignUp() {
       }
     } else {
       try {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL!}/api/signup`, {
+        const res = await axios.post<LoginResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/signup`, {
           name,
           email,
           password,
         });
+        console.log(res)
+        dispatch(addUser(res?.data?.data))
+        router.push(`/update/${res?.data?.data?._id}`)
         
       } catch (error: any) {
         const resError = error?.response?.data?.errors;

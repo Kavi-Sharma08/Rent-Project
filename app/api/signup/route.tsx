@@ -16,11 +16,12 @@ export async function POST(req: NextRequest) {
         const user = new UserModel({
             name,
             email,
-            password
+            password,
         })
         const refreshTokenForTheUser = await user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         const userinfo = await user.save();
+        console.log(userinfo)
         const res = NextResponse.json({
             success: true,
             message: "User created",
