@@ -1,21 +1,69 @@
 'use client';
+
 import { indiaStatesAndUTs } from '@/constants/StatesAndUnionTerritoryData';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { ChatgptResponse } from '@/types/ResponseDataForUser';
 import { Raleway_Font } from '@/fonts/signupPageFont';
-import { string } from 'zod';
 
 export default function CollegeAutocomplete() {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState("");
-  const [phone, setPhone] = useState("");
-  const [profileCompletion, setProfileCompletion] = useState(30); 
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [location, setLocation] = useState('');
+  const [phone, setPhone] = useState('');
+  const [profileCompletion, setProfileCompletion] = useState(30);
   const [filteredStates, setFilteredStates] = useState<string[]>([]);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  console.log(debounceTimeout)
 
+  // Fetch college suggestions from API
+  const fetchSuggestions = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        'https://collegeapi-xuix.onrender.com/colleges/search',
+        {}, // body
+        {
+          headers: {
+            keyword: query,
+          },
+        }
+      );
+      console.log(res)
+
+      const suggestions = Array.isArray(res.data)
+        ? res.data.map((college: any) =>
+            college[2]
+              ?.replace(/\:[^>]*\)/gi, '')
+              .replace(/(\(Id)/gi, '')
+              .trim()
+          )
+        : [];
+       console.log(suggestions) 
+
+      setSuggestions(suggestions);
+    } catch (err) {
+      console.error('❌ Suggestion error:', err);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSelect = (college: string) => {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    setQuery(college);
+    setSuggestions([]);
+    setLoading(false);
+  };
+
+  // Debounce for query input
   useEffect(() => {
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -28,24 +76,8 @@ export default function CollegeAutocomplete() {
     }
 
     debounceTimeout.current = setTimeout(() => {
-      const fetchSuggestions = async () => {
-        setLoading(true);
-        try {
-          const res = await axios.post<ChatgptResponse>('/api/getColleges', { query });
-          const suggestions = Array.isArray(res.data.suggestions)
-            ? res.data.suggestions
-            : [];
-          setSuggestions(suggestions);
-        } catch (err) {
-          console.error('❌ Suggestion error:', err);
-          setSuggestions([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-
       fetchSuggestions();
-    }, 600);
+    }, 500);
 
     return () => {
       if (debounceTimeout.current) {
@@ -53,8 +85,10 @@ export default function CollegeAutocomplete() {
       }
     };
   }, [query]);
+
+  // Progress bar calculation
   useEffect(() => {
-    const baseProgress = 30; // Your initial value
+    const baseProgress = 30;
     const totalFields = 3;
     let filled = 0;
 
@@ -62,12 +96,13 @@ export default function CollegeAutocomplete() {
     if (location.trim() !== '') filled++;
     if (phone.trim() !== '') filled++;
 
-    const additionalProgress = Math.floor((filled / totalFields) * 70); // Remaining 70% spread across fields
-
+    const additionalProgress = Math.floor((filled / totalFields) * 70);
     setProfileCompletion(baseProgress + additionalProgress);
   }, [query, location, phone]);
+
+  // Filter Indian states for location
   useEffect(() => {
-    if (location.trim() === "") {
+    if (location.trim() === '') {
       setFilteredStates([]);
     } else {
       const matches = indiaStatesAndUTs.filter((state) =>
@@ -77,22 +112,9 @@ export default function CollegeAutocomplete() {
     }
   }, [location]);
 
-  const handleSelect = (college: string) => {
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    setQuery(college);
-    setSuggestions([]);
-    setLoading(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
-
   return (
     <>
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center text-white">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center text-white mb-6">
         <div className="flex items-center gap-4">
           <div className="relative w-24 h-2 bg-gray-400 rounded-full overflow-hidden">
             <div
@@ -100,20 +122,18 @@ export default function CollegeAutocomplete() {
               style={{ width: `${profileCompletion}%` }}
             />
           </div>
-          <span className="text-sm font-medium">
-            {profileCompletion}% done
-          </span>
+          <span className="text-sm font-medium">{profileCompletion}% done</span>
         </div>
-
       </div>
-      
 
-      <form  className="flex flex-col items-center w-full px-4">
+      <form className="flex flex-col items-center w-full px-4">
         <div className="w-full max-w-3xl flex flex-col items-center space-y-6">
-          
           {/* College Name Field */}
           <div className="w-full relative">
-            <label className={`${Raleway_Font.className} block mb-1 text-white`} htmlFor="college">
+            <label
+              className={`${Raleway_Font.className} block mb-1 text-white`}
+              htmlFor="college"
+            >
               College Name
             </label>
             <input
@@ -128,11 +148,11 @@ export default function CollegeAutocomplete() {
               <div className="absolute top-10 right-3 animate-spin h-4 w-4 border-t-2 border-blue-500 rounded-full" />
             )}
             {suggestions.length > 0 && (
-              <ul className="absolute z-30 mt-1 w-full bg-[#1e1e1e] border border-gray-600 rounded-md shadow-lg max-h-72 overflow-y-auto">
+              <ul className="absolute mt-1 w-full bg-[#1e1e1e] border border-gray-600 rounded-md shadow-lg max-h-72 overflow-y-auto z-50">
                 {suggestions.map((college, idx) => (
                   <li
                     key={idx}
-                    onClick={() => handleSelect(college)}
+                    onMouseDown={() => handleSelect(college)}
                     className="px-4 py-3 border-b border-gray-700 cursor-pointer hover:bg-[#2a2a2a] transition-colors duration-200"
                   >
                     {college}
@@ -144,7 +164,9 @@ export default function CollegeAutocomplete() {
 
           {/* Location Field */}
           <div className="relative w-full">
-            <label htmlFor="location" className="block text-white mb-1">Location</label>
+            <label htmlFor="location" className="block text-white mb-1">
+              Location
+            </label>
             <input
               type="text"
               id="location"
@@ -170,7 +192,6 @@ export default function CollegeAutocomplete() {
                 }
               }}
               onBlur={() => {
-                // Delay hiding to allow click on suggestion
                 setTimeout(() => setFilteredStates([]), 100);
               }}
               placeholder="Enter your location"
@@ -195,12 +216,12 @@ export default function CollegeAutocomplete() {
             )}
           </div>
 
-            
-          
-
           {/* Phone Number Field */}
           <div className="w-full">
-            <label className={`${Raleway_Font.className} block mb-1 text-white`} htmlFor="phone">
+            <label
+              className={`${Raleway_Font.className} block mb-1 text-white`}
+              htmlFor="phone"
+            >
               Phone Number
             </label>
             <input
@@ -215,6 +236,5 @@ export default function CollegeAutocomplete() {
         </div>
       </form>
     </>
-    
   );
 }
