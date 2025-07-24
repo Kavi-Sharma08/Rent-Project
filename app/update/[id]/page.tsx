@@ -3,25 +3,78 @@
 import { indiaStatesAndUTs } from '@/constants/StatesAndUnionTerritoryData';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Raleway_Font } from '@/fonts/signupPageFont';
-
+import { Raleway_Font ,Manrope_Font, Lora_Font } from '@/fonts/signupPageFont';
+import { Lexend_Font , Noticia_Font } from '@/fonts/updatePageFonts';
+import { ZodIssue } from '@/types/typesforErrorSignup';
+import toast , {Toaster} from 'react-hot-toast';
+import { addUserProfile } from '@/slices/userSlice';
+import {UpdateProfileResponse} from "@/types/ResponseDataForUser"
+import { useDispatch } from 'react-redux';
+import { useRouter } from "next/navigation";
 export default function CollegeAutocomplete() {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phoneNumber, setPhone] = useState('');
+  const [college, setSelectedCollege] = useState('');
   const [profileCompletion, setProfileCompletion] = useState(30);
   const [filteredStates, setFilteredStates] = useState<string[]>([]);
+  const [zodError, setzodError] = useState<ZodIssue[]>([]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  console.log(debounceTimeout)
+
+  const handleSubmit = async (e : React.ChangeEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    try {
+      const res = await axios.post<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/update`,{
+        college,
+        location,
+        phoneNumber
+      })
+      const updatedProfile = res?.data?.data;
+      const id = updatedProfile.userId;
+      dispatch(addUserProfile(updatedProfile));
+      router.push(`/dashboard/${id}`);
+      
+    } catch (error : any) {
+      setzodError([]);
+      const resError = error?.response?.data?.errors;
+      if(resError){
+        setzodError(resError);
+        
+      }
+      if(error?.response?.data?.message){
+        console.log(error)
+        const errorToShow = error?.response?.data?.message;
+        toast.error(errorToShow);
+
+      }
+      
+    }
+
+
+  }
+  console.log(zodError);
+  function getErrorMessage(field : string){
+
+    if(zodError.length>0){
+      const filteredError = zodError.filter((pathError)=>(
+        pathError.path[0]===field
+
+      ))
+      return filteredError;
+    }
+
+  }
 
   // Fetch college suggestions from API
   const fetchSuggestions = async () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        'https://collegeapi-xuix.onrender.com/colleges/search',
+        `https://collegeapi-xuix.onrender.com/colleges/search`,
         {}, // body
         {
           headers: {
@@ -58,6 +111,7 @@ export default function CollegeAutocomplete() {
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
+    setSelectedCollege(college)
     setQuery(college);
     setSuggestions([]);
     setLoading(false);
@@ -94,11 +148,11 @@ export default function CollegeAutocomplete() {
 
     if (query.trim() !== '') filled++;
     if (location.trim() !== '') filled++;
-    if (phone.trim() !== '') filled++;
+    if (phoneNumber.trim() !== '') filled++;
 
     const additionalProgress = Math.floor((filled / totalFields) * 70);
     setProfileCompletion(baseProgress + additionalProgress);
-  }, [query, location, phone]);
+  }, [query, location, phoneNumber]);
 
   // Filter Indian states for location
   useEffect(() => {
@@ -114,6 +168,7 @@ export default function CollegeAutocomplete() {
 
   return (
     <>
+      <Toaster/>
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center text-white mb-6">
         <div className="flex items-center gap-4">
           <div className="relative w-24 h-2 bg-gray-400 rounded-full overflow-hidden">
@@ -122,11 +177,11 @@ export default function CollegeAutocomplete() {
               style={{ width: `${profileCompletion}%` }}
             />
           </div>
-          <span className="text-sm font-medium">{profileCompletion}% done</span>
+          <span className={`text-sm font-medium ${Lora_Font.className}`}>{profileCompletion}% done</span>
         </div>
       </div>
 
-      <form className="flex flex-col items-center w-full px-4">
+      <form onSubmit={handleSubmit} className="flex flex-col items-center w-full px-4">
         <div className="w-full max-w-3xl flex flex-col items-center space-y-6">
           {/* College Name Field */}
           <div className="w-full relative">
@@ -142,13 +197,13 @@ export default function CollegeAutocomplete() {
               value={query}
               onChange={handleChange}
               placeholder="Type college name ..."
-              className="w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${Noticia_Font.className}`}
             />
             {loading && (
               <div className="absolute top-10 right-3 animate-spin h-4 w-4 border-t-2 border-blue-500 rounded-full" />
             )}
             {suggestions.length > 0 && (
-              <ul className="absolute mt-1 w-full bg-[#1e1e1e] border border-gray-600 rounded-md shadow-lg max-h-72 overflow-y-auto z-50">
+              <ul className={`${Noticia_Font.className} absolute mt-1 w-full bg-[#1e1e1e] border border-gray-600 rounded-md shadow-lg max-h-72 overflow-y-auto z-50`}>
                 {suggestions.map((college, idx) => (
                   <li
                     key={idx}
@@ -159,6 +214,11 @@ export default function CollegeAutocomplete() {
                   </li>
                 ))}
               </ul>
+            )}
+            {getErrorMessage("college") && (
+              <p className={`${Lexend_Font.className} mt-2 ml-1`} style={{ color: "red", fontSize: "12px" }}>
+                {getErrorMessage("college")?.map((msg)=>msg.message)}
+              </p>
             )}
           </div>
 
@@ -195,7 +255,7 @@ export default function CollegeAutocomplete() {
                 setTimeout(() => setFilteredStates([]), 100);
               }}
               placeholder="Enter your location"
-              className="w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${Noticia_Font.className}`}
             />
 
             {filteredStates.length > 0 && (
@@ -207,14 +267,20 @@ export default function CollegeAutocomplete() {
                       setLocation(state);
                       setFilteredStates([]);
                     }}
-                    className="px-4 py-2 text-white border-b border-gray-700 cursor-pointer hover:bg-[#2a2a2a] transition-colors duration-200"
+                    className={`px-4 py-2 text-white border-b border-gray-700 cursor-pointer hover:bg-[#2a2a2a] transition-colors duration-200 ${Noticia_Font.className}`}
                   >
                     {state}
                   </li>
                 ))}
               </ul>
             )}
+            {getErrorMessage("location") && (
+              <p className={`${Lexend_Font.className} mt-2 ml-1`} style={{ color: "red", fontSize: "12px" }}>
+                {getErrorMessage("location")?.map((msg)=>msg.message)}
+              </p>
+            )}
           </div>
+          
 
           {/* Phone Number Field */}
           <div className="w-full">
@@ -227,11 +293,25 @@ export default function CollegeAutocomplete() {
             <input
               id="phone"
               type="tel"
-              value={phone}
+              value={phoneNumber}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter your phone number"
-              className="w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-md bg-[#1e1e1e] text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${Noticia_Font.className}`}
             />
+            {getErrorMessage("phoneNumber") && (
+              <div style={{ color: "red", fontSize: "12px" }} className={`mt-2 ml-2 ${Lexend_Font.className}`}>
+                {getErrorMessage("phoneNumber")?.map((msg: { message: string }, index: number) => (
+                  <p key={index}>{msg.message}</p>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div  className='w-full'>
+            <button type="submit" disabled={loading} className={`w-full bg-[#2a52be] text-white rounded-sm py-2 hover:bg-blue-700 transition ${Manrope_Font.className}`}>
+              
+              {loading ? "Submitting..." : "Submit"}
+            </button>
           </div>
         </div>
       </form>

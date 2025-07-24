@@ -11,6 +11,7 @@ import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} fro
 import { useRouter } from "next/navigation";
 import { LoginResponse } from "@/types/ResponseDataForUser";
 import toast , {Toaster} from "react-hot-toast"
+import {UpdateProfileResponse} from "@/types/ResponseDataForUser"
 export default function SignUp() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -31,8 +32,18 @@ export default function SignUp() {
           email,
           password,
         });
-        dispatch(addUser(res?.data?.data))
-        router.push(`/update/${res?.data?.data?._id}`)
+        dispatch(addUser(res?.data?.data));
+        const userData = res?.data?.data;
+
+        const ProfileRes = await axios.get<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/updatedProfileOfUser/?id=${userData?._id}`);
+        console.log(ProfileRes)
+        const hasProfile = ProfileRes?.data?.data;
+        if(!hasProfile){
+          return router.push(`/update/${userData._id}`);
+        }
+        else{
+          return router.push(`/dashboard/${userData._id}`);
+        }
         
         
       } catch (error : any) {
@@ -67,6 +78,7 @@ export default function SignUp() {
         }
       }
     }
+    
   };
 
   const getErrorMessage = (field: string) => {

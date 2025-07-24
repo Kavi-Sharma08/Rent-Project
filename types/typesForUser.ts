@@ -7,3 +7,11 @@ export interface User{
     refreshToken?:string
 
 }
+
+export interface UserProfile{
+    _id : string,
+    userId : string,
+    college : string,
+    location : string,
+    phoneNumber : string,
+}

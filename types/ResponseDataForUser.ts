@@ -1,9 +1,8 @@
-import {User} from "@/types/typesForUser"
+import {User, UserProfile} from "@/types/typesForUser"
 export interface LoginResponse {
   data: User;
 }
 
-export interface ChatgptResponse{
-  suggestions : string[]
-  
+export interface UpdateProfileResponse{
+  data : UserProfile
 }
