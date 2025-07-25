@@ -15,7 +15,6 @@ import {UpdateProfileResponse} from "@/types/ResponseDataForUser";
 
 export default function SignUp() {
   const currentUserData = useSelector((store : RootState)=>store.user.currentUser);
-  console.log(currentUserData)
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("Kavi");
@@ -38,11 +37,11 @@ export default function SignUp() {
         dispatch(addUser(res?.data?.data));
         const userData = res?.data?.data;
 
-        const ProfileRes = await axios.get<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/updatedProfileOfUser/?id=${userData?._id}`);
-        console.log(ProfileRes)
+        const ProfileRes = await axios.get<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/completedProfileOfUser/?id=${userData?._id}`);
+        
         const hasProfile = ProfileRes?.data?.data;
         if(!hasProfile){
-          return router.push(`/update/${userData._id}`);
+          return router.push(`/complete/${userData._id}`);
         }
         else{
           dispatch(addUserProfile(hasProfile));
@@ -67,9 +66,9 @@ export default function SignUp() {
           email,
           password,
         });
-        console.log(res)
+        
         dispatch(addUser(res?.data?.data))
-        router.push(`/update/${res?.data?.data?._id}`)
+        router.push(`/complete/${res?.data?.data?._id}`)
         
       } catch (error: any) {
         const resError = error?.response?.data?.errors;
@@ -90,7 +89,7 @@ export default function SignUp() {
       const filteredError = zodError.filter(
         (pathError) => pathError.path[0] === field
       );
-      console.log(filteredError)
+      
       return filteredError
     }
     else{

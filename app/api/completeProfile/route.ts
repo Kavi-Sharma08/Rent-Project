@@ -8,9 +8,9 @@ import DBconnect from "@/lib/dbConnect";
 export async function POST(req : NextRequest) {
     await DBconnect();
     const body = await req.json();
-    console.log(body);
+    
     const parseResult = updateProfileSchema.safeParse(body);
-    console.log(parseResult)
+    
     if(!parseResult.success){
         const errors = parseResult.error.issues;
         return NextResponse.json({errors} , {status:400})
@@ -28,7 +28,7 @@ export async function POST(req : NextRequest) {
     try {
         const decoded = jwt.verify(token , process.env.JWT_SECRET!) as JWTPayload;
         const userId = decoded.id;
-        console.log(userId);
+       
             
         const updatedProfile = new UserProfile({
             userId,
@@ -38,7 +38,7 @@ export async function POST(req : NextRequest) {
 
         })
         const profile = await updatedProfile.save();
-        console.log(profile);
+       
         return NextResponse.json({
             data : profile,
             message : "Profile Updated"

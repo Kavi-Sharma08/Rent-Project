@@ -42,10 +42,10 @@ const UserSchema = new Schema<UserInterface>({
 
 UserSchema.pre("save", async function (next) {
   if (this.isModified("password") && this.password) {
-    console.log("Inside");
+    
     try {
       this.password = await bcrypt.hash(this.password, 10);
-      console.log("Password hashed:", this.password);
+      
     } catch (err: any) {
       console.error("Error hashing password:", err);
       return next(err);

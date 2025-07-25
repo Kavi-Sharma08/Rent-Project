@@ -18,7 +18,5 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (!currentUser) {
     return null; // Optionally render a loader here
   }
-  console.log(children)
-
   return <>{children}</>;
 }

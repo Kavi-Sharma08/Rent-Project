@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         const refreshTokenForTheUser = await user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         const userinfo = await user.save();
-        console.log(userinfo)
+        
         const res = NextResponse.json({
             success: true,
             message: "User created",
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         });
 
         
-        console.log(accessToken)
+        
         return res;
     } 
     catch (error : any) {

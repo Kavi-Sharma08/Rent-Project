@@ -30,7 +30,7 @@ export async function POST(req : NextRequest){
           } , {status : 400})
         }
         const isPasswordValid = await user.isPasswordValid(password);
-        console.log(isPasswordValid)
+       
         if(!isPasswordValid){
             return NextResponse.json({
                 message : "Password is not valid",
@@ -39,7 +39,7 @@ export async function POST(req : NextRequest){
 
         }
         try {
-            console.log("Inside Try")
+           
             if(tokenFromtheUser){
                 const userInfo = jwt.verify(tokenFromtheUser , process.env.JWT_SECRET!) as JWTPayload;
                 if(!userInfo){
@@ -51,7 +51,7 @@ export async function POST(req : NextRequest){
             }
             else if(RefreshtokenFromtheUser){
                 // new token from the refresh token
-                console.log("Inside else if")
+                
                 const userInfo = jwt.verify(RefreshtokenFromtheUser , process.env.REFRESH_TOKEN_SECRET!) as JWTPayload;
                 if(!userInfo){
                   return NextResponse.json({

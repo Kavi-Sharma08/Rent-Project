@@ -28,7 +28,7 @@ export default function CollegeAutocomplete() {
   const handleSubmit = async (e : React.ChangeEvent<HTMLFormElement>)=>{
     e.preventDefault();
     try {
-      const res = await axios.post<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/update`,{
+      const res = await axios.post<UpdateProfileResponse>(`${process.env.NEXT_PUBLIC_API_URL!}/api/completeProfile`,{
         college,
         location,
         phoneNumber
@@ -56,7 +56,7 @@ export default function CollegeAutocomplete() {
 
 
   }
-  console.log(zodError);
+ 
   function getErrorMessage(field : string){
 
     if(zodError.length>0){
@@ -82,7 +82,7 @@ export default function CollegeAutocomplete() {
           },
         }
       );
-      console.log(res)
+      
 
       const suggestions = Array.isArray(res.data)
         ? res.data.map((college: any) =>
@@ -92,7 +92,7 @@ export default function CollegeAutocomplete() {
               .trim()
           )
         : [];
-       console.log(suggestions) 
+       
 
       setSuggestions(suggestions);
     } catch (err) {
