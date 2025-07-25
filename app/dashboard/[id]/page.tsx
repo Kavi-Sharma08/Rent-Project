@@ -1,9 +1,13 @@
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 export default function Dashboard(){
     
     return (
-        <div>
-            Dashboard
-        </div>
+        <ProtectedRoute>
+            <div>
+                Dashboard
+            </div>
+
+        </ProtectedRoute>
         
     )
 }

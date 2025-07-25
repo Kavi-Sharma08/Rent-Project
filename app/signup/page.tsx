@@ -3,16 +3,19 @@ import {useState , useEffect } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import {ZodIssue} from "@/types/typesforErrorSignup";
-import { AppDispatch } from "@/store/appStore";
-import { useDispatch } from "react-redux";
-import { addUser } from "@/slices/userSlice";
+import { AppDispatch, RootState } from "@/store/appStore";
+import { useDispatch , useSelector } from "react-redux";
+import { addUser , addUserProfile } from "@/slices/userSlice";
 import {IAPIError} from "@/types/typesforErrorSignup"
 import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} from "@/fonts/signupPageFont";
 import { useRouter } from "next/navigation";
 import { LoginResponse } from "@/types/ResponseDataForUser";
-import toast , {Toaster} from "react-hot-toast"
-import {UpdateProfileResponse} from "@/types/ResponseDataForUser"
+import toast , {Toaster} from "react-hot-toast";
+import {UpdateProfileResponse} from "@/types/ResponseDataForUser";
+
 export default function SignUp() {
+  const currentUserData = useSelector((store : RootState)=>store.user.currentUser);
+  console.log(currentUserData)
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("Kavi");
@@ -42,6 +45,7 @@ export default function SignUp() {
           return router.push(`/update/${userData._id}`);
         }
         else{
+          dispatch(addUserProfile(hasProfile));
           return router.push(`/dashboard/${userData._id}`);
         }
         
@@ -95,7 +99,6 @@ export default function SignUp() {
   };
   useEffect(()=>{
     setError(null);
-
   },[Login])
 
   return (
