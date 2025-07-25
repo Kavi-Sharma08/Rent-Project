@@ -15,3 +15,17 @@ export interface UserProfile{
     location : string,
     phoneNumber : string,
 }
+
+export interface CompleteUserProfile{
+    _id : string,
+    userId : string,
+    college : string,
+    location : string,
+    phoneNumber : string,
+    name : string,
+    email : string,
+    password : string,
+    createdAt? : string,
+    refreshToken?:string
+
+}
