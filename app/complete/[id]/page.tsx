@@ -11,9 +11,19 @@ import { addUserProfile } from '@/slices/userSlice';
 import {UpdateProfileResponse} from "@/types/ResponseDataForUser"
 import { useDispatch } from 'react-redux';
 import { useRouter } from "next/navigation";
+import { useSession } from 'next-auth/react';
 export default function CollegeAutocomplete() {
-  const dispatch = useDispatch();
+  const {data : session  , status} = useSession();
   const router = useRouter();
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (status === "unauthenticated") {
+      router.push("/signup");
+    }
+  }, [status, router]);
+  const dispatch = useDispatch();
+  
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -139,9 +149,11 @@ export default function CollegeAutocomplete() {
       }
     };
   }, [query]);
+  
 
   // Progress bar calculation
   useEffect(() => {
+    
     const baseProgress = 30;
     const totalFields = 3;
     let filled = 0;
@@ -165,6 +177,9 @@ export default function CollegeAutocomplete() {
       setFilteredStates(matches);
     }
   }, [location]);
+  useEffect(()=>{
+    console.log("Inside Complete")
+  },[])
 
   return (
     <>

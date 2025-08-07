@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken"
 export interface UserInterface extends Document {
   name: string,
   email: string,
-  password: string,
+  password?: string,
   createdAt: Date,
-  refreshToken : string,
+  refreshToken? : string,
   generateAccessToken(): string,
   generateRefreshToken() : Promise<string>,
   isPasswordValid(passwordFromUser : string) : Promise<boolean>
@@ -24,7 +24,7 @@ const UserSchema = new Schema<UserInterface>({
   },
   password: {
     type: String,
-    required: [true, "password is required"],
+    required: false,
   },
   refreshToken : {
     type : String,

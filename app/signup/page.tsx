@@ -3,8 +3,8 @@ import {useState , useEffect } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import {ZodIssue} from "@/types/typesforErrorSignup";
-import { AppDispatch, RootState } from "@/store/appStore";
-import { useDispatch , useSelector } from "react-redux";
+import { AppDispatch } from "@/store/appStore";
+import { useDispatch } from "react-redux";
 import { addUser , addUserProfile } from "@/slices/userSlice";
 import {IAPIError} from "@/types/typesforErrorSignup"
 import {  Lora_Font , Manrope_Font , Raleway_Font , Roboto_Font , Open_Font} from "@/fonts/signupPageFont";
@@ -14,7 +14,6 @@ import toast , {Toaster} from "react-hot-toast";
 import {UpdateProfileResponse} from "@/types/ResponseDataForUser";
 
 export default function SignUp() {
-  const currentUserData = useSelector((store : RootState)=>store.user.currentUser);
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("Kavi");
@@ -23,8 +22,6 @@ export default function SignUp() {
   const [togglePassword, setTogglePassword] = useState(false);
   const [zodError, setZodError] = useState<ZodIssue[]>([]);
   const [error, setError] = useState<IAPIError | null>(null);
-  
-
   const [Login, setLogin] = useState(false);
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -83,7 +80,6 @@ export default function SignUp() {
     }
     
   };
-
   const getErrorMessage = (field: string) => {
     if (zodError.length>0) {
       const filteredError = zodError.filter(
@@ -99,7 +95,6 @@ export default function SignUp() {
   useEffect(()=>{
     setError(null);
   },[Login])
-
   return (
     <div className={`min-h-screen bg-black grid sm:grid-cols-2`}>
       <Toaster/>
@@ -219,6 +214,7 @@ export default function SignUp() {
                 </button>
               </p>
             </div>
+            
           </div>
           
         </div>
