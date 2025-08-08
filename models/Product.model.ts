@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 export interface IProduct {
     title : string, // Title of the Product 
@@ -6,7 +6,7 @@ export interface IProduct {
     price : number,
     imageUrl : string,
     type : string,  // buy or sell
-    postedBy : mongoose.Schema.Types.ObjectId,
+    postedBy : mongoose.Schema.Types.ObjectId | string,
     college : string,
     phoneNumber : string,
     createdAt : Date
@@ -14,7 +14,7 @@ export interface IProduct {
 }
 
 
-const Product = new mongoose.Schema<IProduct>({
+const ProductSchema = new mongoose.Schema<IProduct>({
     title : {
         type : String,
     },
@@ -36,3 +36,6 @@ const Product = new mongoose.Schema<IProduct>({
     }
 
 })
+
+const ProductModel = mongoose.model("Product" , ProductSchema)
+export default ProductModel;

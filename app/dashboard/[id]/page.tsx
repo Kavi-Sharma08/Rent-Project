@@ -6,6 +6,8 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { Sans_Font } from "@/fonts/DashboardFonts";
 import { Manrope_Font } from "@/fonts/signupPageFont";
+import ProductForm from "@/app/components/ProductForm";
+import { IProduct } from "@/models/Product.model";
 
 export default function Dashboard() {
   const reduxDataOfUser = useSelector((store: RootState) => store.user);
@@ -17,21 +19,21 @@ export default function Dashboard() {
 
   console.log(currentUserData);
   console.log(updatedProfile);
-
   useEffect(() => {
     setuserProfle({ ...currentUserData, ...updatedProfile });
   }, [currentUserData, updatedProfile]);
 
-  console.log(userProfile);
+  const handleProductSubmit = (product: IProduct) => {
+    console.log("New Product submitted:", product);
+    // Here you can dispatch redux action or call API to save product
+  };
 
   return (
     <ProtectedRoute>
       <div className="h-screen w-screen flex" style={{ backgroundColor: '#0A0A0A' }}>
         {/* Sidebar */}
         <div
-          className={`${
-            sidebarOpen ? 'w-64' : 'w-0'
-          } transition-all duration-300 ease-in-out overflow-hidden ${Sans_Font.className}`}
+          className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 ease-in-out overflow-hidden ${Sans_Font.className}`}
           style={{ backgroundColor: '#1A1D23' }}
         >
           <div className="p-4 flex justify-between items-center" style={{ borderBottom: '1px solid #2D3748' }}>
@@ -45,10 +47,10 @@ export default function Dashboard() {
               {Object.entries(userProfile)
                 .filter(([key]) => !EXCLUDED_KEYS.includes(key))
                 .map(([key, value]) => (
-                  <div 
-                    key={key} 
+                  <div
+                    key={key}
                     className="p-3 rounded-lg border hover:opacity-90 transition-opacity"
-                    style={{ 
+                    style={{
                       backgroundColor: '#0F172A',
                       borderColor: '#334155'
                     }}
@@ -62,7 +64,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1" style={{ backgroundColor: '#111827' }}>
+        <div className="flex-1 flex flex-col" style={{ backgroundColor: '#111827' }}>
           {/* Header */}
           <div className={`p-4 flex items-center justify-between shadow-lg ${Manrope_Font.className}`} style={{ backgroundColor: '#0F172A' }}>
             <div className="flex items-center">
@@ -78,7 +80,15 @@ export default function Dashboard() {
               <h1 className="text-xl font-semibold text-white">Dashboard</h1>
             </div>
           </div>
-         
+
+          {/* Form Container */}
+          <div className="flex-1 overflow-auto p-6">
+            {currentUserData && currentUserData._id ? (
+              <ProductForm postedBy={currentUserData._id} onSubmit={handleProductSubmit} />
+            ) : (
+              <p className="text-white text-center mt-10">Loading user info...</p>
+            )}
+          </div>
         </div>
       </div>
     </ProtectedRoute>
