@@ -7,7 +7,8 @@ import { useSelector } from "react-redux";
 import { Sans_Font } from "@/fonts/DashboardFonts";
 import { Manrope_Font } from "@/fonts/signupPageFont";
 import ProductForm from "@/app/components/ProductForm";
-import { IProduct } from "@/models/Product.model";
+import { IProductForm } from "@/app/components/ProductForm";
+import axios from "axios"
 
 export default function Dashboard() {
   const reduxDataOfUser = useSelector((store: RootState) => store.user);
@@ -23,8 +24,23 @@ export default function Dashboard() {
     setuserProfle({ ...currentUserData, ...updatedProfile });
   }, [currentUserData, updatedProfile]);
 
-  const handleProductSubmit = (product: IProduct) => {
+  const handleProductSubmit =async (product: IProductForm) => {
     console.log("New Product submitted:", product);
+    const fd = new FormData();
+    fd.append("title", product.title);
+    fd.append("description", product.description);
+    fd.append("price", String(product.price));
+    if (product.imageFile) {
+      fd.append("image", product.imageFile);
+    } // File object
+    fd.append("college", product.college);
+    fd.append("phoneNumber", product.phoneNumber);
+    fd.append("postedBy" , String(product.postedBy));
+    const productData = await axios.post(`${process.env.NEXT_PUBLIC_API_URL!}/api/addProduct` , fd ,{
+      headers : {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     // Here you can dispatch redux action or call API to save product
   };
 

@@ -1,23 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Manrope_Font } from "@/fonts/signupPageFont";
 import {IProduct} from  "@/models/Product.model"
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/appStore";
 
+export interface IProductForm
+extends Omit<IProduct, "imageUrl" | "createdAt"> {
+  imageFile?: File | null; // local file before upload
+}
 interface ProductFormProps {
   postedBy: string; // pass the current logged-in user id to link the product to user
-  onSubmit: (product: IProduct) => void;
+  onSubmit: (product: IProductForm) => void;
 }
 
 export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
-  const [formData, setFormData] = useState<Omit<IProduct, "postedBy" | "createdAt">>({
-    title: "",
-    description: "",
-    price: 0,
-    imageUrl: "",
-    type: "buy",
-    college: "",
-    phoneNumber: "",
+  const currentUser = useSelector((state: RootState) => state.user.updatedProfileOfUser);
+  const [formData, setFormData] = useState<IProductForm>({
+  title: "Sheet Holder",
+  description: "Used in Engineering Mechanics",
+  price: 0,
+  imageFile: null,
+  type: "buy",
+  college: "",
+  phoneNumber:"",
+  postedBy : ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -27,6 +35,17 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
       [name]: name === "price" ? Number(value) : value,
     }));
   };
+  useEffect(()=>{
+    if(currentUser){
+        setFormData((prev)=>({
+            ...prev ,
+            college : currentUser?.college || "",
+            phoneNumber : currentUser?.phoneNumber || ""
+
+
+        }))
+    }
+  },[currentUser])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,10 +60,9 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
       return;
     }
 
-    const product: IProduct = {
+    const product: IProductForm = {
       ...formData,
       postedBy: postedBy,
-      createdAt: new Date(),
     };
 
     onSubmit(product);
@@ -114,8 +132,16 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
           type="file"
           name="imageUrl"
           id="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setFormData((prev) => ({
+                ...prev,
+                imageFile: file // Store the file itself
+              }));
+            }
+          }}
           placeholder="Enter image URL"
           className="w-full p-2 rounded-md bg-gray-800 text-white border border-gray-700"
         />
@@ -132,7 +158,6 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
           onChange={handleChange}
           className="w-full p-2 rounded-md bg-gray-800 text-white border border-gray-700"
         >
-          <option value="buy">Buy</option>
           <option value="sell">Sell</option>
         </select>
       </div>
