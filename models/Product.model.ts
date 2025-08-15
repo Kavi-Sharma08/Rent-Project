@@ -1,6 +1,7 @@
 import mongoose, { mongo } from "mongoose";
 
 export interface IProduct {
+    _id? : mongoose.Schema.Types.ObjectId | string,
     title : string, // Title of the Product 
     description : string,  // About the condition of the Product
     price : number,
@@ -37,5 +38,5 @@ const ProductSchema = new mongoose.Schema<IProduct>({
 
 })
 
-const ProductModel = mongoose.model("Product" , ProductSchema)
+const ProductModel = mongoose.models.Product || mongoose.model<IProduct>("Product", ProductSchema);
 export default ProductModel;

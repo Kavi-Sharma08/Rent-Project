@@ -11,17 +11,8 @@ import { addUserProfile } from '@/slices/userSlice';
 import {UpdateProfileResponse} from "@/types/ResponseDataForUser"
 import { useDispatch } from 'react-redux';
 import { useRouter } from "next/navigation";
-import { useSession } from 'next-auth/react';
 export default function CollegeAutocomplete() {
-  const {data : session  , status} = useSession();
   const router = useRouter();
-  useEffect(() => {
-    if (status === "loading") return;
-
-    if (status === "unauthenticated") {
-      router.push("/signup");
-    }
-  }, [status, router]);
   const dispatch = useDispatch();
   
   const [query, setQuery] = useState('');

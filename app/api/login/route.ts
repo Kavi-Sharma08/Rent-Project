@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken"
 import { JWTPayload } from "@/types/typesForJWTPayload";
 import { UserInterface } from "@/models/User.model";
 export async function POST(req : NextRequest){
-    
     const body = await req.json();
     const parseResult = signinSchema.safeParse(body);
     if(!parseResult.success){

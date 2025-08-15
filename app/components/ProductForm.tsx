@@ -22,7 +22,7 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
   description: "Used in Engineering Mechanics",
   price: 0,
   imageFile: null,
-  type: "buy",
+  type: "sell",
   college: "",
   phoneNumber:"",
   postedBy : ""

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {v2 as cloudinary} from "cloudinary";
 import ProductModel from "@/models/Product.model";
+import DBconnect from "@/lib/dbConnect";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
   api_key: process.env.CLOUDINARY_API_KEY!,
@@ -8,12 +9,14 @@ cloudinary.config({
   secure : true
 });
 export async function POST(req: NextRequest) {
+  await DBconnect();
   try {
     const formData = await req.formData();
     console.log(formData)
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const price  = formData.get("price") as string;
+    const type = formData.get("type") as string;
     const college = formData.get("college") as string;
     const phoneNumber = formData.get("phoneNumber") as string;
     const postedBy = formData.get("postedBy") as string;
@@ -53,12 +56,13 @@ export async function POST(req: NextRequest) {
         price,
         phoneNumber,
         imageUrl : uploadResult.secure_url,
-        postedBy
+        postedBy,
+        type
     })
     const savedProduct = await Product.save();
     console.log(savedProduct);
 
-    return NextResponse.json({ message: "Form data logged" });
+    return NextResponse.json(savedProduct);
   } catch (err) {
     console.error("Error parsing form data", err);
     return NextResponse.json({ error: "Failed to parse form data" }, { status: 500 });
