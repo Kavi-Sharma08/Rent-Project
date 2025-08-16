@@ -18,6 +18,7 @@ export default function MyProducts() {
   const [products, setProducts] = useState<ProductOfUserInterface[] | null>([]);
 
   useEffect(() => {
+    if (!currentUser?._id) return; 
     async function fetchProducts() {
       try {
         const res = await axios.get<ProductOfUser>(

@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    router.push("/login");
+    router.push("/");
   };
 
   const handleProductSubmit = async (product: IProductForm) => {
