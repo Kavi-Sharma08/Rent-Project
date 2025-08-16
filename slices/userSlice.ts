@@ -8,14 +8,12 @@ export interface ProductOfUserInterface extends Omit<IProduct , "college" | "pho
 interface user {
     currentUser : User | null,
     updatedProfileOfUser : UserProfile | null,
-    productDetailsOfUser : ProductOfUserInterface | null;
 
 }
 
 const initialState : user = {
     currentUser : null,
     updatedProfileOfUser : null,
-    productDetailsOfUser : null
 
 }
 export const userSlice = createSlice({
@@ -29,11 +27,6 @@ export const userSlice = createSlice({
             state.updatedProfileOfUser = action.payload
 
         },
-        productDetailsOfUser : (state , action)=>{
-            state.productDetailsOfUser = action.payload
-
-
-        },
         logoutUser : (state)=>{
             state.currentUser = null;
             state.updatedProfileOfUser = null;
@@ -43,5 +36,5 @@ export const userSlice = createSlice({
 
 })
 
-export const {addUser , addUserProfile , logoutUser , productDetailsOfUser} = userSlice.actions;
+export const {addUser , addUserProfile , logoutUser} = userSlice.actions;
 export default userSlice.reducer

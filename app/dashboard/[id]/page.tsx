@@ -8,7 +8,7 @@ import { Sans_Font } from "@/fonts/DashboardFonts";
 import { Manrope_Font } from "@/fonts/signupPageFont";
 import ProductForm, { IProductForm } from "@/app/components/ProductForm";
 import axios from "axios";
-import { logoutUser ,productDetailsOfUser } from "@/slices/userSlice";
+import { logoutUser } from "@/slices/userSlice";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
@@ -52,7 +52,6 @@ export default function Dashboard() {
       { headers: { "Content-Type": "multipart/form-data" } }
     );
     console.log(response)
-    dispatch(productDetailsOfUser(response?.data))
   };
 
   return (

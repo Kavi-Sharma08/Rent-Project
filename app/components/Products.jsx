@@ -1,51 +1,38 @@
 import React from "react";
 
-const Products = ({
+export default function Products({
   title,
   description,
   price,
   imageUrl,
-  onUpdate,
-  onDelete,
-  showActions = false, // controls update/delete buttons
-}) => {
+  showActions = false,
+  onDelete
+}) {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      {/* Centered top text with font styles */}
-      <h2 className="text-white text-2xl font-bold mb-6 text-center font-sans tracking-wide">
-        Here are your current products
-      </h2>
+    <div className="bg-[#1f2937] rounded-xl shadow-lg overflow-hidden flex flex-col hover:scale-[1.02] transition-transform duration-200">
+      {/* Image */}
+      <img
+        src={imageUrl}
+        alt={title}
+        className="w-full h-40 object-cover"
+      />
 
-      {/* Product Card */}
-      <div className="bg-gray-900 border border-gray-700 rounded-md shadow-md p-4 flex gap-4">
-        {/* Image */}
-        <img
-          src={imageUrl || "/placeholder.jpg"}
-          alt={title}
-          className="w-28 h-20 object-cover rounded-md flex-shrink-0"
-        />
-
-        {/* Info */}
-        <div className="flex flex-col justify-between flex-grow">
-          <div>
-            <h3 className="text-white font-semibold text-lg">{title}</h3>
-            <p className="text-gray-400 text-sm truncate">{description}</p>
-          </div>
-          <p className="text-white font-bold mt-2">₹ {price}</p>
+      {/* Content */}
+      <div className="p-4 flex-1 flex flex-col justify-between">
+        <div>
+          <h3 className="text-white font-bold text-lg mb-1 truncate">{title}</h3>
+          <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+            {description}
+          </p>
+          <p className="text-white font-semibold text-lg">₹ {price}</p>
         </div>
 
         {/* Actions */}
         {showActions && (
-          <div className="flex flex-col justify-between space-y-2">
-            <button
-              onClick={onUpdate}
-              className="bg-yellow-500 text-black text-sm px-3 py-1 rounded hover:bg-yellow-600"
-            >
-              Update
-            </button>
+          <div className="mt-4 flex gap-2">
             <button
               onClick={onDelete}
-              className="bg-red-500 text-white text-sm px-3 py-1 rounded hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium flex-1"
             >
               Delete
             </button>
@@ -54,6 +41,4 @@ const Products = ({
       </div>
     </div>
   );
-};
-
-export default Products;
+}
