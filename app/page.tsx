@@ -2,8 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { Poppins, Montserrat, Lexend } from "next/font/google";
-import {LOGO} from "@/constants/Logo"
-import ProtectedRoute from "./components/ProtectedRoute";
 
 const poppins = Poppins({ subsets: ['latin'], weight: ["400", "700"] });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ["400", "700"] });
@@ -30,14 +28,6 @@ export default function Home() {
             <span style={{ color: VIBRANT }}>Just</span>
             <span style={{ color: WHITE }}>Share</span>
           </h1>
-          <img
-            src={LOGO}
-            alt="JustShare Logo"
-            width={48}
-            height={48}
-            className="rounded-lg object-contain"
-            style={{ width: "48px", height: "48px" }}
-          />
         </div>
         
         <nav className="space-x-5">

@@ -38,6 +38,7 @@ export default function MyProducts() {
 
     try {
       const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/deleteProduct?id=${productId}`);
+      toast.success("Product deleted successfully")
       setProducts((prev) => prev?.filter((p) => p._id !== productId) || []);
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -46,6 +47,7 @@ export default function MyProducts() {
 
   return (
     <ProtectedRoute>
+      <Toaster/>
       <div className={`${nunito.className} min-h-screen bg-[#111827] px-4 py-10`}>
         {/* Single heading */}
         <h2 className="text-white text-3xl sm:text-4xl font-extrabold text-center mb-12 tracking-wide">

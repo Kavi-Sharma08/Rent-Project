@@ -22,17 +22,21 @@ export async function POST(req: NextRequest) {
     const postedBy = formData.get("postedBy") as string;
     const file = formData.get("image") as File;
     if(!file){
-        return NextResponse.json({
-            message : "Image is required"
-        }, { status: 400 })
-        
+      return NextResponse.json({
+        message : "Image is required"
+      }, { status: 400 })
+      
+    }
+    if(!title || !description || !price || !type || !college || !phoneNumber){
+      return NextResponse.json({
+        message : "Field is Required"
+      } , {status : 400})
     }
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const uploadResult = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        {   folder: "products",
-            use_filename: true,
+        {   use_filename: true,
             unique_filename: false ,
             transformation: [
                 { width: 800, height: 800, crop: "limit" }, // limit size

@@ -1,1 +1,0 @@
-export const LOGO = "https://res.cloudinary.com/dgndczptk/image/upload/v1755344722/products/file.jpg"

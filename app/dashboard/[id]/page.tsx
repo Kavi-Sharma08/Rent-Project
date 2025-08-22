@@ -10,6 +10,7 @@ import ProductForm, { IProductForm } from "@/app/components/ProductForm";
 import axios from "axios";
 import { logoutUser } from "@/slices/userSlice";
 import { useRouter } from "next/navigation";
+import toast , {Toaster} from "react-hot-toast";
 
 export default function Dashboard() {
   const reduxDataOfUser = useSelector((store: RootState) => store.user);
@@ -34,28 +35,39 @@ export default function Dashboard() {
   };
 
   const handleProductSubmit = async (product: IProductForm) => {
-    const fd = new FormData();
-    fd.append("title", product.title);
-    fd.append("description", product.description);
-    fd.append("price", String(product.price));
-    if (product.imageFile) {
-      fd.append("image", product.imageFile);
+    try {
+      const fd = new FormData();
+      fd.append("title", product.title);
+      fd.append("description", product.description);
+      fd.append("price", String(product.price));
+      if (product.imageFile) {
+        fd.append("image", product.imageFile);
+      }
+      fd.append("college", product.college);
+      fd.append("phoneNumber", product.phoneNumber);
+      fd.append("postedBy", String(product.postedBy));
+      fd.append("type" , product.type);
+  
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL!}/api/addProduct`,
+        fd,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log(response);
+      if(response && response.status ==200){
+        toast.success("Product added to the Card")
+      }
+      
+    } catch (error : any) {
+      console.log(error)
+      toast.error(error?.response?.data?.message)
+      
     }
-    fd.append("college", product.college);
-    fd.append("phoneNumber", product.phoneNumber);
-    fd.append("postedBy", String(product.postedBy));
-    fd.append("type" , product.type);
-
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL!}/api/addProduct`,
-      fd,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-    console.log(response)
   };
 
   return (
     <ProtectedRoute>
+      <Toaster/>
       <div className="h-screen w-screen flex" style={{ backgroundColor: "#0A0A0A" }}>
         {/* Sidebar */}
         <div

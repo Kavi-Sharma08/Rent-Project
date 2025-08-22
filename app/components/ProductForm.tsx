@@ -5,6 +5,7 @@ import { Manrope_Font } from "@/fonts/signupPageFont";
 import {IProduct} from  "@/models/Product.model"
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/appStore";
+import toast , {Toaster} from "react-hot-toast"
 
 export interface IProductForm
 extends Omit<IProduct, "imageUrl" | "createdAt"> {
@@ -49,16 +50,27 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // minimal validation example: title and price required
     if (!formData.title.trim()) {
-      alert("Please enter the product title");
+      toast.error("Please enter the product title");
+      return;
+    }
+    if (!formData.description.trim()) {
+      toast.error("Description of the product is required");
       return;
     }
     if (formData.price <= 0) {
-      alert("Price must be a positive number");
+      toast.error("Price must be a positive number");
       return;
     }
+    if (!formData.college.trim()) {
+      toast.error("College is required");
+      return;
+    }
+    if (!formData.phoneNumber.trim()) {
+      toast.error("Phone Number is required");
+      return;
+    }
+    
 
     const product: IProductForm = {
       ...formData,
@@ -87,7 +99,7 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
           onChange={handleChange}
           placeholder="Enter product title"
           className="w-full p-2 rounded-md bg-gray-800 text-white border border-gray-700"
-          required
+          
         />
       </div>
 
@@ -120,7 +132,7 @@ export default function ProductForm({ postedBy, onSubmit }: ProductFormProps) {
           step={0.01}
           placeholder="Enter price"
           className="w-full p-2 rounded-md bg-gray-800 text-white border border-gray-700"
-          required
+          
         />
       </div>
 
