@@ -76,7 +76,7 @@ export default function CollegeAutocomplete() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `https://collegeapi-xuix.onrender.com/colleges/search`,
+        `${process.env.NEXT_BACKEND_URL_COLLEGE_API}/colleges/search`,
         {}, // body
         {
           headers: {
