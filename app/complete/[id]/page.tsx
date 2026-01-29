@@ -76,7 +76,7 @@ export default function CollegeAutocomplete() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.NEXT_BACKEND_URL_COLLEGE_API}/colleges/search`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL_COLLEGE_API}/colleges/search`,
         {}, // body
         {
           headers: {
